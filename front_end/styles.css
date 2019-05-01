@@ -52,6 +52,15 @@ button:hover{
   top: 160px;
 }
 
+#scoreContainer {
+  position: relative;
+  display: block;
+  top: 170px;
+}
+#scoreContainer p {
+    font-size: 24pt;
+    font-weight: bold;  
+}
 
 #retake {
   display: none;

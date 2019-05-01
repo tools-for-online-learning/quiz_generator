@@ -3,6 +3,8 @@ $.get('output.json').done(function (myQuestions) {
   const quizContainer = document.getElementById("quiz");
   const feedbackContainer = document.getElementById("feedback");
   const allQuestions = Object.entries(myQuestions);
+  let numberCorrect = 0;
+  let answeredQuestions = [];
   buildQuiz(allQuestions);
 
 
@@ -79,6 +81,8 @@ $.get('output.json').done(function (myQuestions) {
 
   // check answer
   function checkAnswer() {
+    answeredQuestions.push(currentQuestion);
+    checkButton.style.display = "none";
     // get corresponding feedback
     const answerContainer = quizContainer.querySelectorAll(".options")[currentQuestion];
     const selector = `input[name=question${currentQuestion}]:checked`;
@@ -92,6 +96,7 @@ $.get('output.json').done(function (myQuestions) {
     // if answer is correct
     if (userAnswer.toLowerCase() === allQuestions[currentQuestion][1].correct.toLowerCase()) {
       tmp_feedback = 'Correct. ' + allQuestions[currentQuestion][1].feedback;
+      numberCorrect++;
     } // if answer is incorrect
     else {
       tmp_feedback = 'Incorrect. ' + allQuestions[currentQuestion][1].feedback;
@@ -107,11 +112,11 @@ $.get('output.json').done(function (myQuestions) {
       // retakeButton.style.display = "inline-block";
     }
 
-    if (currentQuestion >= slides.length -2) {
-      // $('.slide').hide();
+    if (answeredQuestions.length == slides.length/2) {
+      $('#scoreContainer').html(`<p>You scored ${numberCorrect}/${allQuestions.length/2}</p>`);
       checkButton.style.display = "none";
       previousButton.style.display = "none";
-      if (currentQuestion == slides.length - 2) {
+      if (currentQuestion % 2 == 0) {
         retakeButton.style.display = "inline-block";
       } else if (currentQuestion == slides.length - 1) {
         alert("You're all done; way to go!");
@@ -138,11 +143,19 @@ $.get('output.json').done(function (myQuestions) {
     } else {
       nextButton.style.display = "inline-block";
     }
+    if (answeredQuestions.indexOf(n) >= 0) {
+      checkButton.style.display = "none";
+    } else {
+      checkButton.style.display = "inline-block";
+    }
   }
 
 
-  function retakeQuestion() {
+  function retakeQuiz() {
     $('.slide').show();
+    numberCorrect = 0;
+    answeredQuestions = [];
+    $('#scoreContainer').html('')
     retakeButton.style.display = "none";
     nextButton.style.display = "inline-block";
     checkButton.style.display = "inline-block";
@@ -169,7 +182,7 @@ $.get('output.json').done(function (myQuestions) {
   // on check answer, show feedback
   // submitButton.addEventListener("click", showResults);
   checkButton.addEventListener("click", checkAnswer);
-  retakeButton.addEventListener("click", retakeQuestion);
+  retakeButton.addEventListener("click", retakeQuiz);
   nextButton.addEventListener("click", showNextQuestion);
   previousButton.addEventListener("click", showPreviousQuestion);
 
