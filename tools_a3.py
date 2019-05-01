@@ -7,7 +7,7 @@ output = defaultdict()
 
 
 
-questions = pandas.read_csv("./Questions_data_prj3.csv")
+questions = pandas.read_csv("./Questions_data_prj3_validation - Question_data.csv")
 
 for index, row in questions.iterrows():
 	newQuestion = defaultdict()
@@ -19,10 +19,11 @@ for index, row in questions.iterrows():
 	newQuestion['correct'] = row['Correct_answer_choice']
 	output[str(index+1) + "_original"] = newQuestion
 	output[str(index+1) + "_retake"] = defaultdict()
+	output[str(index+1) + "_retake"]['question'] = row['Question_text']
 
 
 
-answers = pandas.read_csv("./Answers_data_prj3_updated.csv").sort_values(by=['Student_score_on_question', 'Quiz_score', 'Average_quizzes_score'], ascending=[False, False, False])
+answers = pandas.read_csv("./Answers_data_prj3_validation - Answer_data.csv").sort_values(by=['Student_score_on_question', 'Quiz_score', 'Average_quizzes_score'], ascending=[False, False, False])
 answerGroups = answers.groupby('Question_id')
 
 
@@ -33,30 +34,34 @@ answerGroups = answers.groupby('Question_id')
 	# If there are fewer than 3 different wrong answers that were selected, include additional wrong responses from the last group of wrong answers
 		#i.e. if everyone who got the question wrong chose the same wrong answer, include 3 responses from people who chose that wrong answer
 res = [[] for group in answerGroups]
+count = 0
 for index, group in answerGroups:
+	
 	#Select top two answers
 	best_answers = group.head(2)['Answer_text']
 	feedback = best_answers.iloc[0] #used best response as feedback
 	correct_answer_for_retake = best_answers.iloc[1] #use second best answer as correct answer for retake
 
 
-	res[index-1].append(feedback)
-	res[index-1].append(correct_answer_for_retake)
+	res[count].append(feedback)
+	res[count].append(correct_answer_for_retake)
 
 
 	# For every wrong answer given, add a response to the answers
 	wrong = group.loc[group.Student_score_on_question < 1].groupby('Student_choice_on_question')
+	# Sort according to most common wrong answers
+	wrong_sorted =sorted(wrong, key=lambda x: len(x[1]), reverse=True)  # reverse the sort i.e. largest first
 	countOfDifferentWrongAnswers = len(wrong) #used to detect if we need multiple responses from this wrong answer group
 	wrongAnswerIndex = 1
-	for name, wrong_group in wrong:
-		res[index-1].append(wrong_group.head(1)['Answer_text'].iloc[0]) #grab first wrong answer from this group
+	for name, wrong_group in wrong_sorted:
+		res[count].append(wrong_group.head(1)['Answer_text'].iloc[0]) #grab first wrong answer from this group
 		# Check if there aren't enough groups of wrong answers (i.e. < 3 different wrong answers chosen by students)
 		if countOfDifferentWrongAnswers < 3 and wrongAnswerIndex == countOfDifferentWrongAnswers:
 			# If not enough distinct wrong answers, take extra wrong free responses from last group of wrong answers
 			for answerIndex, answerRow in wrong_group.iloc[1:].iterrows():
-				res[index-1].append(answerRow['Answer_text'])
+				res[count].append(answerRow['Answer_text'])
 		wrongAnswerIndex += 1
-
+	count += 1
 
 
 # Create retake question from previous answers
@@ -67,7 +72,7 @@ for index, answerList in enumerate(res):
 	output[str(index+1) + "_original"]['feedback'] = feedback #Original and retake get same feedback
 	output[str(index+1) + "_retake"]['feedback'] = feedback
 	# Select correct option for retake as second best answer given
-	correctAnswerName = optionNames.pop(randint(0, len(answerList)-1))
+	correctAnswerName = optionNames.pop(randint(0, min(len(answerList)-1,len(optionNames)-1)))
 	output[str(index+1) + "_retake"][correctAnswerName] = answerList.pop(0) #Choose random optionName (a, b, c, c) for correct answer
 	output[str(index+1) + "_retake"]["correct"] = correctAnswerName
 	for answerIndex, answerName in enumerate(optionNames):
@@ -76,5 +81,5 @@ for index, answerList in enumerate(res):
 			output[str(index+1) + "_retake"][answerName] = res[index][answerIndex]
 
 # Save result as json on disk
-with open("./output.json", 'w') as f:
+with open("./output_validation.json", 'w') as f:
 	json.dump(output, f)

@@ -1,0 +1,24 @@
+{
+  "name": "tol-project3",
+  "version": "1.0.0",
+  "description": "Generates quiz answers from student data & renders quizzes",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.16.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sxy96/TOL-project3.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sxy96/TOL-project3/issues"
+  },
+  "homepage": "https://github.com/sxy96/TOL-project3#readme"
+}
