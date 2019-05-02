@@ -95,11 +95,11 @@ $.get('output.json').done(function (myQuestions) {
     const userAnswer = userAnswerList.join(',');
     // if answer is correct
     if (userAnswer.toLowerCase() === allQuestions[currentQuestion][1].correct.toLowerCase()) {
-      tmp_feedback = 'Correct. ' + allQuestions[currentQuestion][1].feedback;
+      tmp_feedback = 'Correct. Possible answer: ' + allQuestions[currentQuestion][1].feedback;
       numberCorrect++;
     } // if answer is incorrect
     else {
-      tmp_feedback = 'Incorrect. ' + allQuestions[currentQuestion][1].feedback;
+      tmp_feedback = 'Incorrect. Possible answer: ' + allQuestions[currentQuestion][1].feedback;
     }
 
     const thisFeedback = document.querySelector(`.question${currentQuestion}`);
